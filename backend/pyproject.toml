@@ -20,7 +20,8 @@ dependencies = [
     "asyncpg",
     "alembic",
     "environs",
-    "betterlogging~=0.2",
+    "betterlogging",
+    "pydantic_settings",
 ]
 [project.optional-dependencies]
 bot = [

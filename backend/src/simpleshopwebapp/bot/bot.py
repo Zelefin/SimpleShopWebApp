@@ -15,23 +15,24 @@ import betterlogging as bl
 from aiogram import Bot, Dispatcher, F
 from aiogram.fsm.storage.redis import DefaultKeyBuilder, RedisStorage
 
-from backend.infrastructure.database.setup import create_engine, create_session_pool
-from backend.config_reader import Config, load_config
-from backend.src.handlers import routers_list
+from simpleshopwebapp.infrastructure.database.setup import create_engine, create_session_pool
+from simpleshopwebapp.config_reader import Config, load_config
+from simpleshopwebapp.bot.handlers import routers_list
 
-from backend.src.middlewares.database import DatabaseMiddleware
-from backend.src.misc.default_commands import set_default_commands
-from backend.src.services import broadcaster
+from simpleshopwebapp.bot.middlewares.database import DatabaseMiddleware
+from simpleshopwebapp.bot.misc.default_commands import set_default_commands
+from simpleshopwebapp.bot.services import broadcaster
 
 
 async def on_startup(bot: Bot, config: Config, dp: Dispatcher) -> None:
     if config.bot.use_webhook:
         await set_webhook(bot, dp, config)
-    await broadcaster.broadcast(bot, [config.admin.id], "Bot started")
-    await set_default_commands(bot)
+    await broadcaster.broadcast(bot, config.bot.admins, "Bot started")
+    await set_default_commands(bot, config.bot.admins)
 
 
 async def start_dispatcher(bot: Bot, dp: Dispatcher) -> None:
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 
@@ -108,7 +109,7 @@ def main():
     engine = create_engine(config.postgres.construct_sqlalchemy_url())
     session_pool = create_session_pool(engine)
 
-    bot = Bot(token=config.bot.token, default=DefaultBotProperties(parse_mode="HTML"))
+    bot = Bot(token=config.bot.token.get_secret_value(), default=DefaultBotProperties(parse_mode="HTML"))
     dp = Dispatcher(storage=storage)
 
     dp.include_routers(*routers_list)
@@ -120,7 +121,7 @@ def main():
         dp=dp,
     )
 
-    dp.message.filter(F.chat.id.in_({config.chat.prod, config.chat.debug}))
+    dp.message.filter(F.chat.type == "private")
 
     dp.startup.register(on_startup)
 

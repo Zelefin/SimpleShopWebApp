@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.infrastructure.database.repo.users import UserRepo
+from simpleshopwebapp.infrastructure.database.repo.users import UserRepo
 
 
 @dataclass

@@ -2,8 +2,8 @@ from typing import Optional
 
 from sqlalchemy.dialects.postgresql import insert
 
-from backend.infrastructure.database.models import User
-from backend.infrastructure.database.repo.base import BaseRepo
+from simpleshopwebapp.infrastructure.database.models import User
+from simpleshopwebapp.infrastructure.database.repo.base import BaseRepo
 
 
 class UserRepo(BaseRepo):
